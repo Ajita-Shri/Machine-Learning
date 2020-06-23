@@ -1,0 +1,60 @@
+#student performance model  
+
+
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+dataset = pd.read_csv('student-mat.csv')
+X = dataset.iloc[:,0:32].values
+y= dataset.iloc[:,32].values
+
+
+from sklearn.preprocessing import LabelEncoder
+le= LabelEncoder()
+X[:, 0] = le.fit_transform(X[:, 0])
+X[:, 1] = le.fit_transform(X[:, 1])
+X[:, 3] = le.fit_transform(X[:, 3])
+X[:, 4] = le.fit_transform(X[:, 4])
+X[:, 5] = le.fit_transform(X[:, 5])
+X[:, 8] = le.fit_transform(X[:, 8])
+X[:, 9] = le.fit_transform(X[:, 9])
+X[:, 10] = le.fit_transform(X[:, 10])
+X[:, 11] = le.fit_transform(X[:, 11])
+X[:, 15] = le.fit_transform(X[:, 15])
+X[:, 16] = le.fit_transform(X[:, 16])
+X[:, 17] = le.fit_transform(X[:, 17])
+X[:, 18] = le.fit_transform(X[:, 18])
+X[:, 19] = le.fit_transform(X[:, 19])
+X[:, 20] = le.fit_transform(X[:, 20])
+X[:, 21] = le.fit_transform(X[:, 21])
+X[:, 22] = le.fit_transform(X[:, 22])
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+ct = ColumnTransformer([('one_hot_encoder', OneHotEncoder(), [8,9,10,11])], remainder='passthrough')
+X= np.array(ct.fit_transform(X), dtype= np.float)
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 101)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+
+from sklearn.linear_model import LinearRegression
+lr= LinearRegression()
+lr.fit(X_train, y_train)
+print('m :', lr.coef_)
+print('c: ',lr.intercept_)
+y_pred= lr.predict(X_test)
+
+
+import seaborn as sns
+sns.distplot(y_test-y_pred, bins=50)
+from sklearn import metrics
+print('MAE:', metrics.mean_absolute_error(y_test, y_pred))
+accuracy= lr.score(X_test,y_test)
+print('RMSE: ',np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+print('Accuracy :', accuracy)
